@@ -1,0 +1,72 @@
+Question1:
+
+Introduction:
+
+we aim to provide a comprehensive overview of our proposed system architecture. This is designed to track onsite user behavior across thousands of 
+online shops efficiently. Our primary goal is to highlight the strengths of our current system and address potential challenges and their solutions.
+
+In today's e-commerce landscape, understanding user behavior is paramount. With thousands of online shops vying for consumer attention, the ability to 
+capture, analyze, and act upon user data can be a game-changer. It can influence marketing decisions, improve customer experience, and ultimately, 
+boost sales.
+
+System Overview
+Implemented a tracking gateway that's intricately linked with AWS's Kinesis Firehose service. This system funnels user behavior data seamlessly into an 
+S3 Bucket. It's designed to handle high traffic loads, ensuring that we capture every valuable data point.
+
+We're living in an age of data-driven decisions. But as our platform scales and attracts more online shops, it's essential to ensure that our backend
+systems can handle this growth. We must be proactive, anticipate challenges, and evolve our architecture to remain efficient and cost-effective.
+
+
+System Architecture Breakdown:
+
+Visual Representation
+add diagram
+
+online shops-->api gateway-->kinesis firehose-->s3 bucket
+
+Component Overview
+
+When a user visits an online shop and interacts with products – say, by clicking, adding to cart, or purchasing – this action generates a data event.
+This event travels through our tracking gateway, which might preprocess or batch multiple events together. This batched data is then streamed in 
+real-time through Kinesis Firehose, which further ensures optimal formatting and consistent delivery. Finally, the data is securely stored in our S3 
+bucket, ready for further analysis or reporting
+
+
+Challenges & Risks in Current Architecture:
+
+#### **Scalability Concerns**:
+- **Challenge**: Kinesis Firehose has inherent limits regarding the number of records and total throughput per delivery stream. As the client's user 
+   base grows, there may come a time when data inflow surpasses the limits of a single Firehose stream.
+  **Example**: Imagine a Black Friday or Cyber Monday event where user activity surges.Current setup might handle an average of 500,000 records
+  per second, but on these peak days, it spikes to 1 million records per second, surpassing Kinesis's default shard limit.
+  **Solution**: Implement regular monitoring of shard usage and proactively add additional shards or create multiple streams as traffic grows. Ensure
+  auto-scaling is set up appropriately to handle sudden spikes.
+
+#### **Data Ingestion Delays**:
+- **Challenge**: High traffic volumes might occasionally cause latency in processing and delivering data to the S3 bucket.  
+  **Example**: During aforementioned sales events, you might find that data recorded at 10:00 AM only reaches the S3 bucket by 10:30 AM due to heavy 
+  traffic, causing a 30-minute delay. 
+  **Solution**: Optimize Firehose buffering settings to strike a balance between frequency and volume. Set up real-time monitoring to detect and 
+  address such latencies promptly. Consider leveraging AWS Lambda for more granular, real-time processing if required.
+
+#### **Data Security & Privacy**:
+- **Challenge**: User behavior data may contain sensitive or personally identifiable information (PII), which poses security and privacy risks.  
+  **Example**: An online shop tracks user search behavior, which might occasionally include personal data like email addresses if a user mistakenly 
+  types it into the search bar.  
+  **Solution**: Implement stringent data filtering and anonymization techniques at the entry point. Use AWS's built-in encryption mechanisms to 
+  encrypt data both in transit (using TLS) and at rest (using server-side encryption on S3). Ensure regular audits and compliance checks, especially 
+  for regulations like GDPR or CCPA.
+
+#### **Cost Management**:
+- **Challenge**: As data traffic grows, AWS costs associated with Kinesis Firehose and S3 storage can surge significantly.  
+  **Example**: You projected $1,000 per month based on initial traffic estimates. But with an unexpected surge in user activity, costs skyrocket to 
+  $5,000 due to increased data storage and transfer rates.  
+  **Solution**: Use S3's lifecycle policies to move older data to cheaper storage tiers like Glacier or Intelligent-Tiering. Set up budget alerts 
+  using AWS Budgets to notify you when costs approach predefined limits.
+
+#### **Integration with Other Systems**:
+- **Challenge**: The client may use various systems for analytics, marketing, and CRM. Integrating tracking data with these systems can pose challenges.
+  **Example**: The client uses Google Analytics for web analytics and Salesforce for CRM. They want user behavior data to be reflected in both these systems.
+  **Solution**: Develop connectors or leverage available AWS integrations to push data to these platforms. For instance, use AWS Glue for ETL tasks to 
+  transform data into formats suitable for Google Analytics or Salesforce. Ensure data integrity and consistency across systems with regular checks.
+
